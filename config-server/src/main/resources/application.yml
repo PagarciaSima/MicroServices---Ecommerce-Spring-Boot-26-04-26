@@ -1,0 +1,16 @@
+spring:
+ profiles:
+  # Search in File System
+  active: native
+ application:
+  name: config-server
+ cloud:
+  config:
+    server:
+      native:
+       # Specify paths to .yml configs
+       search-locations: classpath:/configurations
+       
+  
+server:
+  port: 8888
