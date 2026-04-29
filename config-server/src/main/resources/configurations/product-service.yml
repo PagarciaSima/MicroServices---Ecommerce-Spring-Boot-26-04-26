@@ -1,17 +1,27 @@
+# Server
 server:
   port: 8050
+
+# Spring
 spring:
+  
+  # Datasource
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/product
     username: username
     password: password
+    
+  # Jpa
   jpa:
     hibernate:
       ddl-auto: validate
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    
+  # Flyway
   flyway:
+    # Accept already created tables
     baseline-on-migrate: true
     enabled: true
     baseline-description: "init"
