@@ -14,6 +14,7 @@ import com.pgs.ecommerce.dto.ProductPurchaseRequest;
 import com.pgs.ecommerce.dto.ProductPurchaseResponse;
 import com.pgs.ecommerce.dto.ProductRequest;
 import com.pgs.ecommerce.dto.ProductResponse;
+import com.pgs.ecommerce.service.ProductService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
