@@ -1,7 +1,8 @@
 package com.pgs.ecommerce.entity.product;
 
 import java.math.BigDecimal;
-import java.util.Locale.Category;
+
+import com.pgs.ecommerce.entity.category.Category;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
