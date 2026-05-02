@@ -12,17 +12,17 @@ import com.pgs.ecommerce.entity.product.Product;
 public class ProductMapper {
     public Product toProduct(ProductRequest request) {
         return Product.builder()
-                .id(request.id())
-                .name(request.name())
-                .description(request.description())
-                .availableQuantity(request.availableQuantity())
-                .price(request.price())
-                .category(
-                        Category.builder()
-                                .id(request.categoryId())
-                                .build()
-                )
-                .build();
+            .id(request.id())
+            .name(request.name())
+            .description(request.description())
+            .availableQuantity(request.availableQuantity())
+            .price(request.price())
+            .category(
+                Category.builder()
+                    .id(request.categoryId())
+                    .build()
+            )
+            .build();
     }
 
     public ProductResponse toProductResponse(Product product) {
