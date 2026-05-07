@@ -1,4 +1,4 @@
-package com.pgs.payment;
+package com.pgs.ecommerce;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
