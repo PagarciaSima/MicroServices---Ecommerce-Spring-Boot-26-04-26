@@ -29,71 +29,59 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository repository;
-    private final OrderMapper mapper;
-    private final CustomerClient customerClient;
-    private final PaymentClient paymentClient;
-    private final ProductClient productClient;
-    private final OrderLineService orderLineService;
-    private final OrderProducer orderProducer;
+	private final OrderRepository repository;
+	private final OrderMapper mapper;
+	private final CustomerClient customerClient;
+	private final PaymentClient paymentClient;
+	private final ProductClient productClient;
+	private final OrderLineService orderLineService;
+	private final OrderProducer orderProducer;
 
-    @Transactional
-    @Override
-    public Integer createOrder(OrderRequest request) {
-    	CustomerResponse customer = this.customerClient.findCustomerById(request.customerId())
-                .orElseThrow(() -> new BusinessException("Cannot create order:: No customer exists with the provided ID"));
+	@Transactional
+	@Override
+	public Integer createOrder(OrderRequest request) {
+		// Fetch customer via customer client
+		CustomerResponse customer = fetchCustomerById(request);
+		
+		// Purchase products and get the purchase details (like price, availability, etc.)
+		List<PurchaseResponse> purchasedProducts = productClient.purchaseProducts(request.products());
 
-    	List<PurchaseResponse> purchasedProducts = productClient.purchaseProducts(request.products());
+		Order order = this.repository.save(mapper.toOrder(request));
 
-        Order order = this.repository.save(mapper.toOrder(request));
+		for (PurchaseRequest purchaseRequest : request.products()) {
+			orderLineService.saveOrderLine(
+					new OrderLineRequest(null, order.getId(), purchaseRequest.productId(), purchaseRequest.quantity()));
+		}
 
-        for (PurchaseRequest purchaseRequest : request.products()) {
-            orderLineService.saveOrderLine(
-                    new OrderLineRequest(
-                            null,
-                            order.getId(),
-                            purchaseRequest.productId(),
-                            purchaseRequest.quantity()
-                    )
-            );
-        }
-        
-        PaymentRequest paymentRequest = new PaymentRequest(
-                request.amount(),
-                request.paymentMethod(),
-                order.getId(),
-                order.getReference(),
-                customer
-        );
-        paymentClient.requestOrderPayment(paymentRequest);
+		PaymentRequest paymentRequest = new PaymentRequest(request.amount(), request.paymentMethod(), order.getId(),
+				order.getReference(), customer);
+		
+		// Process payment
+		paymentClient.requestOrderPayment(paymentRequest);
+		
+		// Send order confirmation message to Kafka
+		orderProducer.sendOrderConfirmation(new OrderConfirmation(request.reference(), request.amount(),
+				request.paymentMethod(), customer, purchasedProducts));
 
-        orderProducer.sendOrderConfirmation(
-                new OrderConfirmation(
-                        request.reference(),
-                        request.amount(),
-                        request.paymentMethod(),
-                        customer,
-                        purchasedProducts
-                )
-        );
+		return order.getId();
+	}
 
-        return order.getId();
-    }
+	private CustomerResponse fetchCustomerById(OrderRequest request) {
+		CustomerResponse customer = this.customerClient.findCustomerById(request.customerId()).orElseThrow(
+				() -> new BusinessException("Cannot create order:: No customer exists with the provided ID"));
+		return customer;
+	}
 
-    @Override
-    public List<OrderResponse> findAllOrders() {
-        return this.repository.findAll()
-                .stream()
-                .map(this.mapper::fromOrder)
-                .collect(Collectors.toList());
-    }
+	@Override
+	public List<OrderResponse> findAllOrders() {
+		return this.repository.findAll().stream().map(this.mapper::fromOrder).collect(Collectors.toList());
+	}
 
-    @Override
-    public OrderResponse findById(Integer id) {
-        return this.repository.findById(id)
-                .map(this.mapper::fromOrder)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("No order found with the provided ID: %d", id)));
-    }
+	@Override
+	public OrderResponse findById(Integer id) {
+		return this.repository.findById(id).map(this.mapper::fromOrder).orElseThrow(
+				() -> new EntityNotFoundException(String.format("No order found with the provided ID: %d", id)));
+	}
 }
