@@ -2,3 +2,7 @@
 notification/mvnw
 notification/mvnw.cmd
 notification/.gitattributes
+gateway/mvnw
+gateway/mvnw.cmd
+gateway/.mvn/wrapper/maven-wrapper.properties
+gateway/.gitattributes
