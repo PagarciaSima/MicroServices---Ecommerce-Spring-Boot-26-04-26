@@ -21,4 +21,4 @@ spring:
         spring.json.type.mapping: paymentConfirmation:com.pgs.ecommerce.notification.PaymentNotificationRequest
 application:
   config:
-    product-url: http://localhost:8222/api/v1/productsZW
+    product-url: http://localhost:8222/api/v1/products
