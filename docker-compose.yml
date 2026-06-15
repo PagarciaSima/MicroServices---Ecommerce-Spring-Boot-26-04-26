@@ -109,6 +109,19 @@ services:
       - 1080:1080
       - 1025:1025
 
+  keycloak:
+    container_name: ms-keycloak
+    image: quay.io/keycloak/keycloak:24.0.2
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+    ports:
+      - 9098:8080
+    networks:
+      - microservices-net
+    command: 
+      - "start-dev"
+    
 # Network definition
 networks:
   microservices-net:
